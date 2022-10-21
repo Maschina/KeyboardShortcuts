@@ -11,7 +11,7 @@ extension KeyboardShortcuts {
 		let configuration: ((NSViewType) -> Void)?
 
 		func makeNSView(context: Context) -> NSViewType {
-			let view = NSViewType(for: name, onChange: onChange)
+			let view = .init(for: name, onChange: onChange)
 			configuration?(view)
 			return view
 		}
@@ -25,7 +25,7 @@ extension KeyboardShortcuts {
 	/**
 	A SwiftUI `View` that lets the user record a keyboard shortcut.
 
-	You would usually put this in your preferences window.
+	You would usually put this in your settings window.
 
 	It automatically prevents choosing a keyboard shortcut that is already taken by the system or by the app's main menu by showing a user-friendly alert to the user.
 
@@ -67,14 +67,26 @@ extension KeyboardShortcuts {
 
 		public var body: some View {
 			if hasLabel {
-				_Recorder(
-					name: name,
-					onChange: onChange,
-					configuration: configuration
-				)
-					.formLabel {
+				if #available(macOS 13, *) {
+					LabeledContent {
+						_Recorder(
+							name: name,
+							onChange: onChange,
+                            configuration: configuration
+						)
+					} label: {
 						label
 					}
+				} else {
+					_Recorder(
+						name: name,
+						onChange: onChange,
+                        configuration: configuration
+					)
+						.formLabel {
+							label
+						}
+				}
 			} else {
 				_Recorder(
 					name: name,
@@ -87,7 +99,7 @@ extension KeyboardShortcuts {
 }
 
 @available(macOS 10.15, *)
-extension KeyboardShortcuts.Recorder where Label == EmptyView {
+extension KeyboardShortcuts.Recorder<EmptyView> {
 	/**
 	- Parameter name: Strongly-typed keyboard shortcut name.
 	- Parameter onChange: Callback which will be called when the keyboard shortcut is changed/removed by the user. This can be useful when you need more control. For example, when migrating from a different keyboard shortcut solution and you need to store the keyboard shortcut somewhere yourself instead of relying on the built-in storage. However, it's strongly recommended to just rely on the built-in storage when possible.
@@ -108,7 +120,7 @@ extension KeyboardShortcuts.Recorder where Label == EmptyView {
 }
 
 @available(macOS 10.15, *)
-extension KeyboardShortcuts.Recorder where Label == Text {
+extension KeyboardShortcuts.Recorder<Text> {
 	/**
 	- Parameter title: The title of the keyboard shortcut recorder, describing its purpose.
 	- Parameter name: Strongly-typed keyboard shortcut name.

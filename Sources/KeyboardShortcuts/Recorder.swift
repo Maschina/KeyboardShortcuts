@@ -11,7 +11,7 @@ extension KeyboardShortcuts {
 		let configuration: ((NSViewType) -> Void)?
 
 		func makeNSView(context: Context) -> NSViewType {
-			let view = .init(for: name, onChange: onChange)
+			let view = NSViewType(for: name, onChange: onChange)
 			configuration?(view)
 			return view
 		}
@@ -67,17 +67,17 @@ extension KeyboardShortcuts {
 
 		public var body: some View {
 			if hasLabel {
-				if #available(macOS 13, *) {
-					LabeledContent {
-						_Recorder(
-							name: name,
-							onChange: onChange,
-                            configuration: configuration
-						)
-					} label: {
-						label
-					}
-				} else {
+//				if #available(macOS 13, *) {
+//					LabeledContent {
+//						_Recorder(
+//							name: name,
+//							onChange: onChange,
+//                            configuration: configuration
+//						)
+//					} label: {
+//						label
+//					}
+//				} else {
 					_Recorder(
 						name: name,
 						onChange: onChange,
@@ -86,7 +86,7 @@ extension KeyboardShortcuts {
 						.formLabel {
 							label
 						}
-				}
+//				}
 			} else {
 				_Recorder(
 					name: name,

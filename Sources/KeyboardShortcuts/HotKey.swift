@@ -124,7 +124,24 @@ final class HotKeyCenter {
 		self?.handleKeyEvent(event) ?? event
 	}
 
-	private func handleKeyEvent(_ event: NSEvent) -> NSEvent? {
+	/**
+	Identity of the last key event handled by the menu-open monitors.
+
+	While a menu is tracking, the same `NSEvent` can reach the handlers more than once: both monitors may see it, and the run-loop monitor can see it repeatedly even after consuming it. Without this check, one key press fires the shortcut twice, for example, a toggle switches on and immediately off again.
+	*/
+	private var lastHandledKeyEvent: (type: NSEvent.EventType, keyCode: UInt16, timestamp: TimeInterval)?
+
+	func handleKeyEvent(_ event: NSEvent) -> NSEvent? {
+		if
+			let lastHandledKeyEvent,
+			lastHandledKeyEvent.type == event.type,
+			lastHandledKeyEvent.keyCode == event.keyCode,
+			lastHandledKeyEvent.timestamp == event.timestamp
+		{
+			// Already handled. Keep consuming it so it doesn't reach the menu either.
+			return nil
+		}
+
 		guard
 			handleRawKeyEvent(
 				keyCode: Int(event.keyCode),
@@ -136,6 +153,7 @@ final class HotKeyCenter {
 			return event
 		}
 
+		lastHandledKeyEvent = (type: event.type, keyCode: event.keyCode, timestamp: event.timestamp)
 		return nil
 	}
 
